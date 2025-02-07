@@ -1,0 +1,80 @@
+{% load static %}
+<div class="relative w-full">
+    <!-- Background image container -->
+    <div class="absolute inset-0 w-full h-full overflow-hidden">
+        <img src="https://image.tmdb.org/t/p/w500{{profile_path}}" alt="" class="w-full h-full object-cover brightness-50 scale-[2] origin-left">
+        <div class="absolute inset-0 backdrop-blur-3xl"></div>
+    </div>
+
+    <!-- Content container -->
+    <div class="relative z-10 flex flex-col md:flex-row text-white items-center justify-center p-10 md:py-[75px] md:px-[104px] lg:py-[60px] lg:px-[177px] xl:px-[305px] 2xl:py-10 2xl:px-[358px]">
+        <!-- Profile image -->
+        <img src="https://image.tmdb.org/t/p/w500{{profile_path}}" alt="" class="aspect-1 object-cover rounded-full mb-5 md:mb-0 md:mr-10 h-[170px]">
+        
+        <!-- Biography and name -->
+        <div class="relative description-wrapper flex flex-col">
+            <h1 class="text-xl md:text-4xl font-bold text-center md:text-left">{{name}}</h1>
+            <p class="description-container line-clamp-4 text-sm text-center md:text-left mt-1 md:mt-0 hide-last-word">
+                {{biography}}
+            </p>                     
+            
+            <!-- More button -->
+            <button data-description="{{biography}}"
+            data-modal-target="info-modal" 
+            data-modal-toggle="info-modal" 
+            data-title="Biography"  
+            class="more-button info-modal-button z-30 absolute hidden bottom-0 right-0 text-xs font-bold text-[#0A84fF] ">
+                MORE
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="p-5 md:p-10">
+    <div class="w-full py-3 px-6 md:px-0 font-bold text-white text-lg">
+        <h2>All Movies</h2>
+    </div>
+<div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-5">
+    {% for movie in movie_credits.cast %}
+        <div class="relative mb-2 aspect-[0.8]">
+            <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="" 
+            onerror="this.onerror=null; this.src='{% static 'placeholder/movieplaceholder.svg' %}';" 
+            class="object-cover object-top w-full h-full shadow-xl rounded-xl brightness-90"
+            >
+            <div class="absolute inset-0">
+                <button
+                  class="absolute bottom-0 right-0 flex items-center justify-center m-2 h-6 w-6 backdrop-blur-md bg-black/30 hover:bg-[#0A84FF] rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="#ffffff">
+                    <circle cx="5" cy="12" r="2" />
+                    <circle cx="12" cy="12" r="2" />
+                    <circle cx="19" cy="12" r="2" />
+                  </svg>
+                </button>
+              </div>
+        </div>
+    {% endfor %}
+</div>
+</div>
+
+<div class="border-b-[1px] mx-10 border-[#fafafa]/10"></div>
+
+
+<div class="p-5 md:p-10">
+    <div class="w-full py-3 px-6 md:px-0 font-bold text-white text-lg">
+        <h2>All TVshows</h2>
+    </div>
+<div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-5">
+    {% for tv in tv_credits.cast %}
+        <div class="mb-2 aspect-[0.8]">
+            <img src="https://image.tmdb.org/t/p/w500{{ tv.poster_path }}" alt="" 
+            onerror="this.onerror=null; this.src='{% static 'placeholder/tvplaceholder.svg' %}';" 
+            class="object-cover object-top w-full h-full shadow-xl rounded-xl brightness-90"
+            >
+        </div>
+    {% endfor %}
+</div>
+</div>

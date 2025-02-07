@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer components{
+  .hide-last-word {
+    --line-height: 22;
+    --link-length: 4;
+    --one-ch: 8;
+    --fade-direction: 270deg;
+    word-break: break-word;
+    position: relative;
+    -webkit-mask: linear-gradient(0deg,transparent 0,transparent calc(var(--line-height) * 1px),#000 calc(var(--line-height) * 1px)),linear-gradient(var(--fade-direction),transparent 0,transparent calc((var(--link-length) * var(--one-ch)) * 1px),#000 calc(((var(--link-length) * var(--one-ch)) + (var(--line-height) * 2)) * 1px));
+    mask: linear-gradient(0deg,transparent 0,transparent calc(var(--line-height) * 1px),#000 calc(var(--line-height) * 1px)),linear-gradient(var(--fade-direction),transparent 0,transparent calc((var(--link-length) * var(--one-ch)) * 1px),#000 calc(((var(--link-length) * var(--one-ch)) + (var(--line-height) * 2)) * 1px));
+    -webkit-mask-size: initial,initial;
+    mask-size: initial,initial;
+    -webkit-mask-position: right bottom;
+    mask-position: right bottom;
+    z-index: 1
+  }   
+  /* Reusable class to hide the scrollbar */
+  .no-scrollbar {
+    @apply overflow-x-auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+
+  .information-container{
+    @apply bg-[#1f1f1f] px-10 py-8
+  }
+  .information-container h1{
+    @apply text-xl text-white font-bold my-5
+  }
+  .information-container h2{
+    @apply text-sm text-white
+  }
+  .information-container h3{
+    @apply text-sm text-[#989898] mb-5
+  }
+}

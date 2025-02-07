@@ -1,0 +1,448 @@
+{% load static %}
+{% load custom_filters %}
+
+<div class="relative w-full">
+    <div class="absolute inset-0 w-full h-full overflow-hidden">
+        <img src="https://image.tmdb.org/t/p/w500{% if backdrop_path %}{{backdrop_path}}{% else %}{{poster_path}}{% endif %}" alt="" class="w-full brightness-50 object-cover">
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-3xl"></div>
+    </div> 
+    <!--main conatiner-->   
+    <div class="relative z-10 flex flex-col md:flex-row text-white items-center justify-center p-5 py-10 md:py-[75px] md:px-[104px] lg:py-[60px] lg:px-[177px] xl:px-[305px] 2xl:py-10 2xl:px-[358px]">
+        <img src="https://image.tmdb.org/t/p/w500{% if poster_path %}{{poster_path}}{% else %}{{backdrop_path}}{% endif %}" alt="" class="hidden md:block object-cover rounded-3xl mr-10 w-1/4 aspect-[0.8]">
+        <!--image and logo/name for the small screen-->
+        <div class="md:hidden flex items-center justify-start">
+            <img src="https://image.tmdb.org/t/p/w500{% if poster_path %}{{poster_path}}{% else %}{{backdrop_path}}{% endif %}" alt="" class=" object-cover rounded-2xl mr-5 mb-5 w-1/3 aspect-[0.8]">
+            <div>
+                <h1 class="text-3xl text-white text-left font-bold">
+                    {% if title %}
+                    {{ title }}
+                  {% else %}
+                    {{ name }}
+                  {% endif %}
+                </h1>
+                <h3 class="mb-5 font-bold text-xs text-left text-[#cecccc]">{% if genres %}{% for genre in genres %}{{ genre.name }}{% if not forloop.last %} • {% endif %}{% endfor %}{% endif %}</h3>    
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <!--logo/name-->
+            <h1 class="hidden md:block text-4xl text-white text-left font-bold">
+            {% if title %}
+                {{ title }}
+              {% else %}
+                {{ name }}
+              {% endif %}</h1>
+            <h3 class="hidden md:block font-bold text-xs text-center md:text-left text-[#cecccc] mb-2">{% if genres %}{% for genre in genres %}{{ genre.name }}{% if not forloop.last %} • {% endif %}{% endfor %}{% endif %}</h3>
+            <!--description-->
+            <div class="relative description-wrapper">
+                <p  class="description-container line-clamp-4 text-sm text-left mt-1 md:mt-0 hide-last-word">
+                    {{overview}}
+                </p>                     
+                <button  
+                type="button"
+                data-description="{{overview}}"
+                data-modal-target="info-modal" 
+                data-modal-toggle="info-modal" 
+                data-title="Overview"     
+                class="more-button info-modal-button z-30 absolute hidden bottom-0 right-0 text-xs  font-bold text-[#0A84fF] ">
+                    MORE
+                </button>
+            </div>
+            <div class="flex pt-2">
+                <button type="button" class="text-black h-9 w-1/2 md:h-12 font-bold bg-white  rounded-lg text-sm mr-2">Add to Watchlist</button>
+                <button type="button" class="text-black h-9 w-1/2 md:h-12 font-bold bg-white  rounded-lg text-sm">Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% if videos.results %}
+<div class="carousel-container carousel-container-scroll w-full">
+    <!--heading of the container-->
+    <div class="w-full pt-3 px-6 md:px-10 font-bold text-white text-lg">
+      <h2>Videos</h2>
+    </div>
+    <!--main container-->
+    <div class="relative w-full group">
+      <!--scroll button-->
+      <button class="scroll-left absolute hidden md:block z-30 left-0 w-10 h-full pl-3 "
+        style="background: linear-gradient(to right, #2d2d2d 60%, rgba(45, 45, 45, 0.5) 80%, rgba(45, 45, 45, 0.2) 95%, rgba(45, 45, 45, 0) 100%);">
+        <svg class="w-3 h-7 fill-[#2d2d2d] group-hover:fill-white" viewBox="0 0 13 29" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.716 28.349l-.779.651L0 14.5 11.937 0l.779.651L1.303 14.5z" /></svg>
+        <span class="sr-only">Previous</span>
+      </button>
+  
+      <button class="scroll-right absolute hidden md:block z-30 right-0 w-10 h-full pl-4 "
+        style="background: linear-gradient(to left, #2d2d2d 60%, rgba(45, 45, 45, 0.5) 80%, rgba(45, 45, 45, 0.2) 95%, rgba(45, 45, 45, 0) 100%);">
+        <svg class="w-3 h-7 fill-[#2d2d2d] group-hover:fill-white" viewBox="0 0 13 29" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0.284 28.349l.779.651L13 14.5 1.063 0l-.779.651L11.697 14.5z" /></svg>
+        <span class="sr-only">Next</span>
+      </button>
+  
+      <!--list of items-->
+      <ul
+        class="w-full py-5 pl-6 md:px-10 flex space-x-[var(--gap)] overflow-x-auto no-scrollbar scroll-snap-x snap-mandatory scroll-smooth">
+        {% for movie in videos.results %}
+        <!--item-->
+        <li class="flex-shrink-0">
+          <div>
+              <div class="relative">
+                <!--image-->
+                <button class="relative mb-2 w-full" data-trailer= {{movie.key }} data-modal-target="trailer-modal" data-modal-toggle="trailer-modal" type="button">
+                  <div class="flex-shrink-0">
+                    <img src="https://img.youtube.com/vi/{{ movie.key }}/maxresdefault.jpg"
+                      class="video-thumbnail w-full aspect-[16/9] object-cover rounded-xl shadow-lg"
+                      data-fallback-src="https://image.tmdb.org/t/p/w500{% if backdrop_path %}{{backdrop_path}}{% else %}{{poster_path}}{% endif %}" 
+                      alt="Movie Poster"
+                      loading="lazy">
+                  </div>
+                </button>
+  
+                <!--title name and all-->
+                <div>
+                    <h3 class="text-[#efefef] text-sm">{{movie.type}}</h3>
+                </div>
+              </div>
+            </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  
+  <div class="border-b-[1px] mx-10 border-[#fafafa]/10"></div>
+  {% endif %}
+
+
+
+{% if credits.cast %}
+  <div class="carousel-container-scroll w-full">
+    <!--heading of the container-->
+    <div class="w-full pt-3 px-6 md:px-10 font-bold text-white text-lg">
+      <h2>Cast</h2>
+    </div>
+    <!--main container-->
+    <div class="relative w-full group">
+      <!--scroll button-->
+      <button class="scroll-left absolute hidden md:block z-30 left-0 w-10 h-full pl-3 "
+        style="background: linear-gradient(to right, #2d2d2d 60%, rgba(45, 45, 45, 0.5) 80%, rgba(45, 45, 45, 0.2) 95%, rgba(45, 45, 45, 0) 100%);">
+        <svg class="w-3 h-7 fill-[#2d2d2d] group-hover:fill-white" viewBox="0 0 13 29" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.716 28.349l-.779.651L0 14.5 11.937 0l.779.651L1.303 14.5z" /></svg>
+        <span class="sr-only">Previous</span>
+      </button>
+  
+      <button class="scroll-right absolute hidden md:block z-30 right-0 w-10 h-full pl-4 "
+        style="background: linear-gradient(to left, #2d2d2d 60%, rgba(45, 45, 45, 0.5) 80%, rgba(45, 45, 45, 0.2) 95%, rgba(45, 45, 45, 0) 100%);">
+        <svg class="w-3 h-7 fill-[#2d2d2d] group-hover:fill-white" viewBox="0 0 13 29" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0.284 28.349l.779.651L13 14.5 1.063 0l-.779.651L11.697 14.5z" /></svg>
+        <span class="sr-only">Next</span>
+      </button>
+  
+      <!--list of items-->
+      <ul
+        class="w-full py-5 pl-6 md:px-10 flex space-x-5 overflow-x-auto no-scrollbar scroll-snap-x snap-mandatory scroll-smooth">
+        {% for person in credits.cast %}
+        <!--item-->
+        <li class="flex-shrink-0">
+          <!--contains all the items like link and button if available-->
+          <div>
+            <!--picture container with link to different page-->
+              <!--container have image and overlay buttons-->
+              <div class="relative">
+                <!--image-->
+                  <div class="flex-shrink-0 relative mb-2">
+                    <a hx-get="/person/{{person.id}}" hx-target="#content" hx-trigger="click"hx-push-url="true">
+                      <img src="https://image.tmdb.org/t/p/w300{{ person.profile_path }}"
+                      class="w-[94px] md:w-[98px] lg:w-[100px] xl:w-[132px] 2xl:w-[127px] aspect-1 object-cover rounded-full shadow-lg"
+                      loading="lazy"
+                      onerror="this.onerror=null; this.src='{% static 'placeholder/person.svg' %}';" 
+                      decoding="async"
+                      alt="{{person.name}}">
+                    </a>
+                  </div>
+  
+                <!--title name and all-->
+                <div class="w-[94px] md:w-[98px] lg:w-[100px] xl:w-[132px] 2xl:w-[127px] text-xs text-[#efefef] line-clamp-3 grid place-items-center text-center leading-normal">
+                  <h3>{{ person.name }}</h3>
+                  <h6 class="text-[#989898]">{{person.character}}</h6>
+                </div>
+              </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="border-b-[1px] mx-10 border-[#fafafa]/10"></div>
+
+{% endif %}
+
+{% if recommendations.results %}
+  <div class="carousel-container carousel-container-scroll w-full">
+    <!--heading of the container-->
+    <div class="w-full pt-3 px-6 md:px-10 font-bold text-white text-lg">
+      <h2>Recommendation</h2>
+    </div>
+    <!--main container-->
+    <div class="relative w-full group">
+      <!--scroll button-->
+      <button class="scroll-left absolute hidden md:block z-30 left-0 w-10 h-full pl-3 "
+        style="background: linear-gradient(to right, #2d2d2d 60%, rgba(45, 45, 45, 0.5) 80%, rgba(45, 45, 45, 0.2) 95%, rgba(45, 45, 45, 0) 100%);">
+        <svg class="w-3 h-7 fill-[#2d2d2d] group-hover:fill-white" viewBox="0 0 13 29" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.716 28.349l-.779.651L0 14.5 11.937 0l.779.651L1.303 14.5z" /></svg>
+        <span class="sr-only">Previous</span>
+      </button>
+  
+      <button class="scroll-right absolute hidden md:block z-30 right-0 w-10 h-full pl-4 "
+        style="background: linear-gradient(to left, #2d2d2d 60%, rgba(45, 45, 45, 0.5) 80%, rgba(45, 45, 45, 0.2) 95%, rgba(45, 45, 45, 0) 100%);">
+        <svg class="w-3 h-7 fill-[#2d2d2d] group-hover:fill-white" viewBox="0 0 13 29" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0.284 28.349l.779.651L13 14.5 1.063 0l-.779.651L11.697 14.5z" /></svg>
+        <span class="sr-only">Next</span>
+      </button>
+  
+      <!--list of items-->
+      <ul
+        class="w-full py-5 pl-6 md:px-10 flex space-x-[var(--gap)] overflow-x-auto no-scrollbar scroll-snap-x snap-mandatory scroll-smooth">
+        {% for movie in recommendations.results %}
+        <!--item-->
+        <li class="flex-shrink-0">
+          <!--contains all the items like link and button if available-->
+          <div>
+            <!--picture container with link to different page-->
+              <!--container have image and overlay buttons-->
+              <div class="relative">
+                <!--image-->
+                  <div class="flex-shrink-0 relative mb-2">
+                    <a hx-get="/movie/{{movie.id}}" hx-target="#content" hx-trigger="click" hx-push-url="true">
+                      <img src="https://image.tmdb.org/t/p/w300{% if movie.backdrop_path %}{{ movie.backdrop_path }}{% else %}{{ movie.poster_path }}{% endif %}"
+                      class="w-full aspect-[16/9] object-cover rounded-xl shadow-lg" loading="lazy"
+                      onerror="this.onerror=null; this.src='{% static 'placeholder/movieplaceholder.svg' %}';" 
+                      decoding="async" alt="{{movie.title}}">
+                    </a>
+                  </div>
+  
+                <!--title name and all-->
+                <div >
+                  <button 
+                  class="info-modal-button w-full flex"
+                  type="button" 
+                  data-modal-target="info-modal" 
+                  data-modal-toggle="info-modal" 
+                  data-title="{% if movie.title %}{{ movie.title}}{% else %}{{movie.name}}{% endif %}" 
+                  data-genre="{% if movie.genres %}{% for genre in movie.genres %}{{ genre }}{% if not forloop.last %} • {% endif %}{% endfor %}{% endif %}" 
+                  data-release-date="{% if movie.release_date %}{{ movie.release_date|date_format}}{% else %}{{movie.first_air_date|date_format}}{% endif %}" 
+                  data-description="{{movie.overview}}">
+                    <div class="flex flex-col items-start">
+                      <h3 class=" text-sm text-[#efefef] line-clamp-2 text-left">{% if movie.title %}{{ movie.title}}{% else %}{{movie.name}}{% endif %}</h3>
+                      <h4 class="text-xs text-left text-[#989898]">
+                        {% if movie.genres %}
+                        {% for genre in movie.genres|slice:":2" %}
+                            {{ genre }}{% if not forloop.last %} | {% endif %}
+                        {% endfor %}
+                        {% endif %}</h4>
+                    </div>
+                  </button>
+                </div>
+              </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  
+  
+  {% endif %}
+
+
+<div class= "flex flex-col md:flex-row information-container">
+    <div class="flex flex-col w-full md:w-2/3">
+      <h1>Information</h1>
+      <div class="flex flex-col md:flex-row">
+        <div class="w-full md:w-1/2">
+          <h2>Original title</h2>
+          <h3>{{original_title}}</h3>
+          <h2>Original name</h2>
+          <h3>{{original_name}}</h3>
+          <h2>Original country</h2>
+          <h3>{{origin_country|first}}</h3>
+          <h2>Original language</h2>
+          <h3>{{original_language}}</h3>
+          <h2>Budget</h2>
+          <h3>{{budget|metric_format}}</h3>
+        </div>
+        <div class="w-full md:w-1/2">
+          <h2>Tagline</h2>
+          <h3>{{tagline}}</h3>
+          {% if genres %}
+          <h2>genres</h2>
+          <h3>
+              {% for genre in genres %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          </h3>
+          {% endif %}
+          <h2>Release date</h2>
+          <h3>{% if release_date %}{{ release_date|date_format}}{% else %}{{first_air_date|date_format}}{% endif %}</h3>
+          <h2>Runtime</h2>
+          <h3>{{runtime|time_format}}</h3>
+        </div>  
+      </div>
+    </div>
+    <div class="md:hidden border-b-[1px] border-[#fafafa]/10"></div>
+    <div class="flex flex-col w-full md:w-1/3 ">
+      <h1>links</h1>
+      {% if homepage %}
+      <h2>Homepage</h2>
+      <div class="mb-5">
+        <a href="{{homepage}}" target="blank">
+          <?xml version="1.0" encoding="iso-8859-1"?>
+          <svg fill="#efefef" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+            width="50px" height="40px" viewBox="0 0 495.398 495.398"
+            xml:space="preserve">
+          <g>
+            <g>
+              <g>
+                <path d="M487.083,225.514l-75.08-75.08V63.704c0-15.682-12.708-28.391-28.413-28.391c-15.669,0-28.377,12.709-28.377,28.391
+                  v29.941L299.31,37.74c-27.639-27.624-75.694-27.575-103.27,0.05L8.312,225.514c-11.082,11.104-11.082,29.071,0,40.158
+                  c11.087,11.101,29.089,11.101,40.172,0l187.71-187.729c6.115-6.083,16.893-6.083,22.976-0.018l187.742,187.747
+                  c5.567,5.551,12.825,8.312,20.081,8.312c7.271,0,14.541-2.764,20.091-8.312C498.17,254.586,498.17,236.619,487.083,225.514z"/>
+                <path d="M257.561,131.836c-5.454-5.451-14.285-5.451-19.723,0L72.712,296.913c-2.607,2.606-4.085,6.164-4.085,9.877v120.401
+                  c0,28.253,22.908,51.16,51.16,51.16h81.754v-126.61h92.299v126.61h81.755c28.251,0,51.159-22.907,51.159-51.159V306.79
+                  c0-3.713-1.465-7.271-4.085-9.877L257.561,131.836z"/>
+              </g>
+            </g>
+          </g>
+          </svg>
+        </a>
+      </div>
+      {% endif %}
+      {% if production_companies %}
+      <h2>Companies</h2>
+      <div class=" flex flex-wrap m-2">
+        {% for company in production_companies %}
+        <div class="mr-5 min-w-10 min-h-10">
+          <a href="/company/{{company.id}}">
+            <img src="https://image.tmdb.org/t/p/w300{{company.logo_path}}" alt={{company.name}} class="h-10 object-contain rounded-sm bg-[#807878] p-1" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">{{company.name}}</span>
+          </a>
+          <h3 class="text-white line-clamp-1">{{company.name}}</h3>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if external_ids %}
+      <h2>Externals</h2>
+      <div class=" flex flex-wrap m-2">
+        {% if external_ids.imdb_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://www.imdb.com/title/{{ external_ids.imdb_id }}" target="blank">
+            <img src="https://www.imdb.com/favicon.ico" alt="IMDb" class="h-10 object-contain rounded-sm bg-[#807878]" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">IMDb</span>
+          </a>
+          <h3 class="text-white">IMDb</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.facebook_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://www.facebook.com/{{ external_ids.facebook_id }}"  target="blank">
+            <img src="https://www.facebook.com/favicon.ico" alt="Facebook" class="h-10 object-contain rounded-sm bg-[#807878]" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">Facebook</span>
+          </a>
+          <h3 class="text-white">Facebook</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.instagram_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://www.instagram.com/{{ external_ids.instagram_id }}" target="blank">
+            <img src="https://www.instagram.com/favicon.ico" alt="Instagram" class="h-10 object-contain rounded-sm bg-[#807878] " 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">Instagram</span>
+          </a>
+          <h3 class="text-white">Instagram</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.twitter_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://twitter.com/{{ external_ids.twitter_id }}"   target="blank">
+            <img src="https://twitter.com/favicon.ico" alt="Twitter" class="h-10 object-contain rounded-sm bg-[#807878]" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">Twitter</span>
+          </a>
+          <h3 class="text-white">Twitter</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.tvdb_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://thetvdb.com/series/{{ external_ids.tvdb_id }}"   target="blank">
+            <img src="https://thetvdb.com/images/icon.png" alt="TVDB" class="h-10 object-contain rounded-sm bg-[#807878] " 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">TVDB</span>
+          </a>
+          <h3 class="text-white">TVDB</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.tvrage_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://www.tvmaze.com/externals/{{ external_ids.tvrage_id }}"   target="blank">
+            <img src="https://www.tvmaze.com/favicon.ico" alt="TVRage" class="h-10 object-contain rounded-sm bg-[#807878]" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">TVRage</span>
+          </a>
+          <h3 class="text-white">TVRage</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.freebase_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://www.freebase.com/{{ external_ids.freebase_id }}"   target="blank">
+            <img src="https://www.freebase.com/favicon.ico" alt="Freebase" class="h-10 object-contain rounded-sm bg-[#807878]" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">Freebase</span>
+          </a>
+          <h3 class="text-white">Freebase</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.tiktok_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://www.tiktok.com/@{{ external_ids.tiktok_id }}"   target="blank">
+            <img src="https://www.tiktok.com/favicon.ico" alt="TikTok" class="h-10 object-contain rounded-sm bg-[#807878]" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">TikTok</span>
+          </a>
+          <h3 class="text-white">TikTok</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.youtube_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://www.youtube.com/channel/{{ external_ids.youtube_id }}"   target="blank">
+            <img src="https://www.youtube.com/favicon.ico" alt="YouTube" class="h-10 object-contain rounded-sm bg-[#807878] " 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">YouTube</span>
+          </a>
+          <h3 class="text-white">YouTube</h3>
+        </div>
+        {% endif %}
+        
+        {% if external_ids.wikidata_id %}
+        <div class="mr-5 mb-5 min-w-10 min-h-10">
+          <a href="https://www.wikidata.org/wiki/{{ external_ids.wikidata_id }}"   target="blank">
+            <img src="https://www.wikidata.org/favicon.ico" alt="WikiData" class="h-10 object-contain rounded-sm bg-[#807878] " 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="flex items-center justify-center text-white bg-[#807878] h-full rounded-sm" style="display:none;">WikiData</span>
+          </a>
+          <h3 class="text-white">WikiData</h3>
+        </div>
+        {% endif %}        
+      </div>
+      {% endif %}
+    </div>
+</div>

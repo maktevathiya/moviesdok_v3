@@ -1,0 +1,43 @@
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+db.sqlite3
+.env
+*.log
+*.pot
+*.py[cod]
+*.bak
+*.swp
+.idea/
+.vscode/
+myenv/
+# Ignore node_modules if you're using npm/yarn for Tailwind
+node_modules/
+
+# Ignore build artifacts (if any)
+*.tgz
+*.tar.gz
+
+# Ignore compiled/migrated database files
+*.sqlite3-journal
+
+# Ignore all environment-related directories
+.env/
+venv/
+myenv/
+
+# Ignore Django-specific directories
+/media/        # Media files (uploaded by users)
+/staticfiles/  # Collected static files
+/__pycache__/  # Redundant (already included, but ensure it's applied)
+
+# Ignore editor-specific files (you already have .idea/ and .vscode/)
+*.sublime-workspace
+*.sublime-project
+
+# Ignore background jobs, pip cache, and build artifacts
+celerybeat-schedule
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
