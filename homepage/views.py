@@ -83,32 +83,46 @@ def home(request):
         "tv_shows": reordered_tv_shows,
         "person": reordered_persons,
     }
-    return request_handler( request, "home.html", context=context)
+    return request_handler( request, "home.html", context)
 
 
 
-
-
-def search_movies(request):
-    query = request.GET.get('q')
-    if query:
-        url = f"https://api.themoviedb.org/3/search/multi?api_key={settings.TMDB_API_KEY}&query={query}"
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json().get('results', [])
-            movies = [
-                {
-                    'title': movie.get('title') or movie.get('name'),  # 'title' for movies and 'name' for TV shows
-                    'poster_path': f"https://image.tmdb.org/t/p/w200{movie['poster_path']}" if movie.get('poster_path') else None,
-                    'media_type': movie['media_type'],
-                    'tmdb_id': movie['id']
-                }
-                for movie in data
-            ]
-            return JsonResponse(movies, safe=False)
-    return JsonResponse([], safe=False)
 
 from utils.tmdb_api import fetch_homepage_data
 def hompage(request):
     data = fetch_homepage_data()
-    return request_handler(request, 'home.html', context=data)
+    return request_handler(request, 'home.html', data)
+
+
+TMDB_API_KEY = settings.TMDB_API_KEY
+
+
+def search_movies(request):
+    query = request.GET.get("q", "")
+    category = request.GET.get("category", "all") 
+    is_fetch = request.headers.get("Accept") == "application/json" 
+    category_map = {
+        "movies": "movie",
+        "tvseries": "tv",
+        "people": "person",
+        "collection": "collection"
+    }
+
+    search_url = f"https://api.themoviedb.org/3/search/{category_map.get(category, 'multi')}"
+    
+    params = {
+        "api_key": TMDB_API_KEY,
+        "query": query,
+        "language": "en-US",
+        "include_adult": False,
+        "sort_by": "popularity.desc"
+    }
+    results = []
+    if query:
+        response = requests.get(search_url, params=params)
+        results = response.json().get("results")
+
+    if is_fetch:
+        return JsonResponse({"results": results})
+    
+    return request_handler(request, "search.html", {"results": results, "query": query, "category": category})

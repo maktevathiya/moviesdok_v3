@@ -1,0 +1,84 @@
+{% load static %}
+<div class="md:hidden pt-5 px-5 md:px-10 flex justify-between">
+    <h3 class="font-bold text-xl text-white">Search</h3>
+    <button 
+    hx-target="#content" hx-trigger="click" hx-push-url="true" hx-indicator="#loader"
+    onclick="goBackCustom(this)"
+    class="font-bold text-blue-600 text-sm">Cancel</button>
+</div>
+<!-- Search Input -->
+<div class="m-5 md:m-10 relative">
+<div class="flex max-w-lg border-[1px] border-white focus-within:border-transparent text-white text-xs rounded-md bg-[#2d2d2d] focus-within:ring-2 focus-within:ring-[#989898]">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" class="fill-[#efefef] w-4 h-4 m-2" aria-hidden="true">
+        <path d="m26.72 50.414c5.205 0 10.005-1.683 13.932-4.488l14.773 14.773c.686.686 1.59 1.028 2.556 1.028 2.026 0 3.46-1.558 3.46-3.553 0-.935-.312-1.807-.998-2.493l-14.68-14.71c3.086-4.052 4.925-9.07 4.925-14.524 0-13.184-10.784-23.968-23.967-23.968-13.153 0-23.968 10.753-23.968 23.968 0 13.183 10.784 23.967 23.968 23.967zm0-5.174c-10.285 0-18.793-8.508-18.793-18.793 0-10.286 8.508-18.794 18.794-18.794 10.285 0 18.793 8.508 18.793 18.794 0 10.285-8.508 18.793-18.793 18.793z"></path>
+    </svg>
+    <input
+        type="text"
+        id="movie-search-bar"
+        name="q"
+         value="{{ query|default:'' }}"
+        autocomplete="off"
+        placeholder="Search"
+        class=" text-white text-xs h-6 p-0 my-1 flex-1 bg-[#2d2d2d] border-none outline-none focus:ring-0 focus:border-transparent"
+    />
+    <button
+        id="reset-search"
+        class="w-6 h-6 m-1 {% if not results %} hidden {% endif %}">
+        <svg class="fill-[#cecccc] rounded-full bg-[#3d3d3d] group-hover:fill-white w-full h-full p-1" xmlns="http://www.w3.org/2000/svg"  viewBox="0 -960 960 960" >
+            <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+        <span class="sr-only">clear</span>
+
+    </button>
+        <!-- Loading Indicator -->
+    <div id="movie-search-spinner" class="hidden ">
+        <div class="loader h-8 w-8 relative">
+        </div>
+    </div>
+
+    </div>
+    <button 
+    onclick="goBackCustom(this)"
+    hx-target="#content" hx-trigger="click" hx-push-url="true" hx-indicator="#loader"
+    class="font-bold text-blue-600 text-sm absolute right-0 top-0 hidden md:block">Cancel</button>
+
+</div>
+
+<!-- Search Results Dropdown -->
+<div id="movie-search-dropdown" class="w-full bg-[#2d2d2d] mt-1 ">
+    <div class="sticky top-0 bg-[#2d2d2d] ">
+    <div class="mx-6 md:mx-12 border-b-[1px] border-[#fafafa]/10 flex no-scrollbar">
+        <button class="me-4 text-white text-sm p-1 {% if category == 'all' %} border-b-4 border-blue-600 {% endif %}">All</button>
+        <button class="me-4 text-white text-sm p-1 {% if category == 'movies' %} border-b-4 border-blue-600 {% endif %}">Movies</button>
+        <button class="me-4 text-white text-sm p-1 {% if category == 'tvseries' %} border-b-4 border-blue-600 {% endif %}">TvSeries</button>
+        <button class="me-4 text-white text-sm p-1 {% if category == 'people' %} border-b-4 border-blue-600 {% endif %}">People</button>
+        <button class="text-white text-sm p-1 {% if category == 'collection' %} border-b-4 border-blue-600 {% endif %}">Collection</button>
+                </div>
+    </div>
+    {% if query %}
+    <div id="movie-results-container" class="p-2 overflow-y-auto h-screen no-scrollbar">          
+        {% for result in results %}
+        <div class="p-2 hover:bg-[#ddd] rounded-md cursor-pointer flex items-center">
+            <img src="https://image.tmdb.org/t/p/w92/prSfAi1xGrhLQNxVSUFh61xQ4Qy.jpg" alt="Thor" class="w-10 h-14 mr-3 rounded-lg">
+            <span class="text-sm text-gray-200 group-hover:font-semibold group-hover:text-black">Thor</span>
+        </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <div id="movie-results-container" class="p-2">          
+    </div>
+    {% endif %}
+</div>
+
+<div class="p-5 md:p-10">
+    <div class="w-full py-3 px-6 md:px-0 font-bold text-white text-lg">
+        <h2>All Movies</h2>
+    </div>
+<div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-5">
+        <a hx-get="/movie/{{movie.id}}" hx-target="#content" hx-trigger="click" hx-push-url="true" hx-indicator="#loader" class="relative mb-2 aspect-[0.8] cursor-pointer">
+            <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="" 
+            onerror="this.onerror=null; this.src='{% static 'placeholder/movie.png' %}';" 
+            class="object-cover object-top w-full h-full shadow-xl rounded-xl brightness-90"
+            >
+        </a>
+</div>
+</div>

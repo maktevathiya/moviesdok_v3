@@ -365,6 +365,7 @@ def fetch_homepage_data():
     :return: A dictionary containing all the fetched data, categorized by endpoint.
     """
     cache_key = "homepage_data"
+    #cache.delete(cache_key)
     homepage_data = cache.get(cache_key)
 
     if not homepage_data:
@@ -381,6 +382,7 @@ def fetch_homepage_data():
         trending_all_data = make_api_call(trending_all_url, trending_all_params)
 
         if trending_all_data and 'results' in trending_all_data:
+            trending_all_data['results'].sort(key=lambda x: x.get('popularity', 0), reverse=True)
             # Filter out results where media_type is 'person'
             filtered_results = [item for item in trending_all_data['results'] if item.get('media_type') != 'person']
             
@@ -394,6 +396,7 @@ def fetch_homepage_data():
         trending_movies_params = {"api_key": API_KEY}
         trending_movies_data = make_api_call(trending_movies_url, trending_movies_params)
         if trending_movies_data and 'results' in trending_movies_data:
+            trending_movies_data['results'].sort(key=lambda x: x.get('popularity', 0), reverse=True)
             homepage_data["trending_movies"] = trending_movies_data['results']
             print('trending data for movie recived')
 
@@ -403,15 +406,18 @@ def fetch_homepage_data():
         trending_tv_params = {"api_key": API_KEY}
         trending_tv_data = make_api_call(trending_tv_url, trending_tv_params)
         if trending_tv_data and 'results' in trending_tv_data:
+            trending_tv_data['results'].sort(key=lambda x: x.get('popularity', 0), reverse=True)
             homepage_data["trending_tv"] = trending_tv_data['results']
             print('trending data for tv recived')
 
         # Fetch popular persons
-        popular_persons_url = f"{BASE_URL}/person/popular"
+        popular_persons_url = f"{BASE_URL}/trending/person/day"
         popular_persons_params = {"api_key": API_KEY}
         popular_persons_data = make_api_call(popular_persons_url, popular_persons_params)
         if popular_persons_data and 'results' in popular_persons_data:
-            homepage_data["popular_persons"] = popular_persons_data['results']
+            popular_persons_data['results'].sort(key=lambda x: x.get('popularity', 0), reverse=True)
+            filtered_results = [item for item in popular_persons_data['results'] if item.get('known_for_department') == 'Acting']
+            homepage_data["popular_persons"] = filtered_results
             print('trending data for person recived')
             
         # Replace genre numbers with names for movies and TV shows
@@ -486,28 +492,16 @@ def get_title_details(tmdb_id, media_type):
     if media_type == 'tv':
         params = {
             'api_key': API_KEY,
-            'append_to_response': 'videos,credits,recommendations,external_ids,images'
+            'append_to_response': 'videos,credits,recommendations,external_ids,season/1,'
         }
     else:
         params = {
             'api_key': API_KEY,
-            'append_to_response': 'videos,credits,recommendations,external_ids,images'
+            'append_to_response': 'videos,credits,recommendations,external_ids'
         }
     title_data = make_api_call(endpoint, params)
-    if 'images' in title_data and 'logos' in title_data['images']:
-        logos = title_data['images']['logos']
-        if logos:
-            # Filter logos for English language
-            english_logo = next((logo for logo in logos if logo.get('iso_639_1') == 'en'), None)
-            if english_logo:
-                title_data['logo'] = english_logo['file_path']
-            else:
-                title_data['logo'] = ""
-        else:
-            title_data['logo'] = ""  # No logos found, set as empty string
-    else:
-        title_data['logo'] = ""  # No image data, set as empty string
-
+    if 'season/1' in title_data:
+        title_data["season_1"] = title_data.pop("season/1")
     for item in title_data["recommendations"]["results"]:
         category = item["media_type"]
         if 'genre_ids' in item:
@@ -516,5 +510,4 @@ def get_title_details(tmdb_id, media_type):
             # Replace genre IDs with names or remove invalid genre IDs
             item['genres'] = [genre_mapping.get(genre_id) for genre_id in item['genre_ids'] if genre_mapping.get(genre_id)]
  
-
     return title_data

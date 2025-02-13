@@ -238,7 +238,7 @@ def close_bundle(chat_id, unique_id, tmdb_id):
             return JsonResponse({"status":"bundle closed and saved"})
         else:
             send_telegram_message(chat_id, f"you do not have uploaded any files, you first have to upload than press close button.")
-    
+            return JsonResponse({"status":"error", "message":"no file uploaded"})
     except SessionInfo.DoesNotExist:
         send_telegram_message(chat_id, "your session doesnot seems to exists.")
         return JsonResponse({"status":"bundle not exists"})
@@ -1261,6 +1261,22 @@ def continue_function(chat_id, message_id):
                     }
                 )
                 send_media(chat_id, file_list)
+                return JsonResponse({"status": "ok"})
+            else:
+                message = "start uploading files and then press close button or discard the bundle"
+                edit_message(
+                    chat_id,
+                    message_id,
+                    message,
+                    reply_markup={
+                        "inline_keyboard": [
+                            [
+                                {"text": "Close", "callback_data": f"close:{session.tmdb_id}:{session.media_type}:{session.unique_id}:0"},
+                                {"text": "Discard", "callback_data": f"discard:{session.tmdb_id}:{session.media_type}:{session.unique_id}:0"}
+                            ]
+                        ]
+                    }
+                )
                 return JsonResponse({"status": "ok"})
     else:
         edit_message(

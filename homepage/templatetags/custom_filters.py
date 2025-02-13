@@ -47,3 +47,11 @@ def time_format(value):
 
     except (ValueError, TypeError):
         return value  # Return the original value if not a valid number
+
+@register.filter
+def get_key(dictionary, key):
+    """Retrieve a dictionary value using a dynamic key in a Django template"""
+    try:
+        return dictionary.get(key, None)
+    except (AttributeError, TypeError):
+        return None

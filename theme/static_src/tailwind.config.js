@@ -16,6 +16,9 @@ module.exports = {
             '0.5': '0.5px', 
             '1': '1px',        
           },
+          lineClamp: {
+            8: '8',  // Add line-clamp-8
+          },
         },
     },
     plugins: [

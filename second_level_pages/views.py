@@ -58,24 +58,50 @@ def collection(request, collection_id):
         'collection_info':info,
     })
 
-def person_info(request,id):
+def person_info(request, id):
     person_info = get_person_info(id)
-    movies = person_info.get('combined_credits', {}).get('cast', [])
+    
+    # Get and modify the movies list directly
+    if 'movie_credits' in person_info and 'cast' in person_info['movie_credits']:
+        person_info['movie_credits']['cast'].sort(key=lambda x: x.get('popularity', 0), reverse=True)
+        visited_ids = get_visited_ids(request)
+
+        for movie in person_info['movie_credits']['cast']:
+            movie['visited'] = movie['id'] in visited_ids  # Add 'visited' flag directly
+
+    if 'tv_credits' in person_info and 'cast' in person_info['tv_credits']:
+        person_info['tv_credits']['cast'].sort(key=lambda x: x.get('popularity', 0), reverse=True)
+        visited_ids = get_visited_ids(request)
+
+        for tv in person_info['tv_credits']['cast']:
+            tv['visited'] = tv['id'] in visited_ids  # Add 'visited' flag directly
+
 
     # Track user visit
     if request.user.is_authenticated:
-        UserHistory.objects.create(user=request.user, tmdb_id=person_info.get('id'), genre=None, release_date=person_info.get('birthday'), media_type='person',  title=person_info.get('name'), poster_path = person_info.get('profile_path'), rating=person_info.get('popularity'))
+        UserHistory.objects.create(
+            user=request.user,
+            tmdb_id=person_info.get('id'),
+            genre=None,
+            release_date=person_info.get('birthday'),
+            media_type='person',
+            title=person_info.get('name'),
+            poster_path=person_info.get('profile_path'),
+            rating=person_info.get('popularity')
+        )
     else:
-        # Ensure the session is created
         if not request.session.session_key:
             request.session.create()
         session_id = request.session.session_key
-        UserHistory.objects.create(session_id=session_id, tmdb_id=person_info.get('id'), genre=None, release_date=person_info.get('birthday'), media_type='person',  title=person_info.get('name'), poster_path = person_info.get('profile_path'), rating=person_info.get('popularity')) 
-
-    visited_ids = get_visited_ids(request)
-
-            # Separate media results into visited and unvisited
-    unvisited_movie = [item for item in movies if item['id'] not in visited_ids]
-    visited_movie = [item for item in movies if item['id'] in visited_ids]
+        UserHistory.objects.create(
+            session_id=session_id,
+            tmdb_id=person_info.get('id'),
+            genre=None,
+            release_date=person_info.get('birthday'),
+            media_type='person',
+            title=person_info.get('name'),
+            poster_path=person_info.get('profile_path'),
+            rating=person_info.get('popularity')
+        )
 
     return request_handler(request, 'person.html', context=person_info)

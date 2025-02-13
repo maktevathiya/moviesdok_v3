@@ -4,6 +4,67 @@
 
 
 @layer components{
+
+  .information-container{
+    @apply bg-[#1f1f1f] px-10 py-8;
+  }
+  .information-container h1{
+    @apply text-lg text-white font-bold my-5;
+  }
+  .information-container h2{
+    @apply text-xs text-white;
+  }
+  .information-container h3{
+    @apply text-xs text-[#989898] mb-5;
+  }
+  .loader-container{
+    display: none;
+  }
+  .htmx-request.loader-container {
+    display: flex;
+  }
+
+  :root {
+    --gap: 20px; /* Gap between items */
+    --gap2: 80px; /* Gap between items */
+    --items: 1; /* Default number of items visible */
+  }
+
+  @media (min-width: 768px) { /* md breakpoint */
+    :root {
+    --items: 3;
+    }
+  }
+
+  @media (min-width: 1024px) { /* lg breakpoint */
+    :root {
+    --items: 4;
+    }
+  }
+
+  @media (min-width: 1280px) { /* xl breakpoint */
+    :root {
+    --items: 5;
+    }
+  }
+
+  .carousel-container ul {
+    gap: var(--gap);
+    gap2: var(--gap2);
+  }
+
+  .carousel-container li {
+    flex: 0 0 calc((100% - (var(--items) - 1) * var(--gap) - var(--gap2)) / var(--items));
+  }
+
+  @media (max-width: 767px) { /* Screens smaller than 768px */
+    .carousel-container li {
+        flex: 0 0 200px; /* Fixed width of 200px */
+    }
+    }
+}
+
+@layer utilities{
   .hide-last-word {
     --line-height: 22;
     --link-length: 4;
@@ -29,17 +90,45 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari, and Opera */
   }
-
-  .information-container{
-    @apply bg-[#1f1f1f] px-10 py-8
+  /* loader */
+  :root {
+    --bar-width: 5%;
+    --bar-height: 14%;
+    --bar-color: rgb(128, 128, 128);
   }
-  .information-container h1{
-    @apply text-xl text-white font-bold my-5
+  
+  
+  
+  .loader div {
+    width: var(--bar-width);
+    height: var(--bar-height);
+    background: var(--bar-color);
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    opacity: 0;
+    border-radius: 50px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+    animation: fade458 1s linear infinite;
   }
-  .information-container h2{
-    @apply text-sm text-white
+  
+  /* Assign each bar's rotation and delay */
+  .loader div:nth-child(1)  { transform: rotate(0deg) translate(0, -130%);  animation-delay: 0s; }
+  .loader div:nth-child(2)  { transform: rotate(30deg) translate(0, -130%); animation-delay: -0.916s; }
+  .loader div:nth-child(3)  { transform: rotate(60deg) translate(0, -130%); animation-delay: -0.833s; }
+  .loader div:nth-child(4)  { transform: rotate(90deg) translate(0, -130%); animation-delay: -0.75s; }
+  .loader div:nth-child(5)  { transform: rotate(120deg) translate(0, -130%); animation-delay: -0.666s; }
+  .loader div:nth-child(6)  { transform: rotate(150deg) translate(0, -130%); animation-delay: -0.583s; }
+  .loader div:nth-child(7)  { transform: rotate(180deg) translate(0, -130%); animation-delay: -0.5s; }
+  .loader div:nth-child(8)  { transform: rotate(210deg) translate(0, -130%); animation-delay: -0.416s; }
+  .loader div:nth-child(9)  { transform: rotate(240deg) translate(0, -130%); animation-delay: -0.333s; }
+  .loader div:nth-child(10) { transform: rotate(270deg) translate(0, -130%); animation-delay: -0.25s; }
+  .loader div:nth-child(11) { transform: rotate(300deg) translate(0, -130%); animation-delay: -0.166s; }
+  .loader div:nth-child(12) { transform: rotate(330deg) translate(0, -130%); animation-delay: -0.083s; }
+  
+  @keyframes fade458 {
+    from { opacity: 1; }
+    to { opacity: 0.25; }
   }
-  .information-container h3{
-    @apply text-sm text-[#989898] mb-5
-  }
+  
 }

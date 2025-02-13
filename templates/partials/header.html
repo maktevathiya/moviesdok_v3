@@ -1,5 +1,59 @@
-<div class='text-white font-bold'>
-    <a href="/">
-    Moviesdok
-    </a>
+<div class="w-full relative flex items-center">
+    <!-- Center: Website Name (Logo) -->
+    <div class="text-white font-bold absolute left-1/2 transform -translate-x-1/2">
+        <a href="/">Moviesdok</a>
+    </div>
+    <div class="absolute right-2 md:hidden ">
+      <button hx-get="/search" hx-target="#content" hx-trigger="click" hx-push-url="true" hx-indicator="#loader">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" class="fill-[#efefef] w-4 h-4 m-2" aria-hidden="true">
+          <path d="m26.72 50.414c5.205 0 10.005-1.683 13.932-4.488l14.773 14.773c.686.686 1.59 1.028 2.556 1.028 2.026 0 3.46-1.558 3.46-3.553 0-.935-.312-1.807-.998-2.493l-14.68-14.71c3.086-4.052 4.925-9.07 4.925-14.524 0-13.184-10.784-23.968-23.967-23.968-13.153 0-23.968 10.753-23.968 23.968 0 13.183 10.784 23.967 23.968 23.967zm0-5.174c-10.285 0-18.793-8.508-18.793-18.793 0-10.286 8.508-18.794 18.794-18.794 10.285 0 18.793 8.508 18.793 18.794 0 10.285-8.508 18.793-18.793 18.793z"></path>
+      </svg>
+      </button>
+    </div>
+    <div class="absolute hidden md:block  right-0 w-1/6  mx-4 my-2 ">
+      <!-- Search Input -->
+      <div class="flex w-full h-full border-[1px] border-white focus-within:border-transparent text-white text-xs rounded-md bg-black focus-within:ring-2 focus-within:ring-[#989898]">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" class="fill-[#efefef] w-4 h-4 m-2" aria-hidden="true">
+            <path d="m26.72 50.414c5.205 0 10.005-1.683 13.932-4.488l14.773 14.773c.686.686 1.59 1.028 2.556 1.028 2.026 0 3.46-1.558 3.46-3.553 0-.935-.312-1.807-.998-2.493l-14.68-14.71c3.086-4.052 4.925-9.07 4.925-14.524 0-13.184-10.784-23.968-23.967-23.968-13.153 0-23.968 10.753-23.968 23.968 0 13.183 10.784 23.967 23.968 23.967zm0-5.174c-10.285 0-18.793-8.508-18.793-18.793 0-10.286 8.508-18.794 18.794-18.794 10.285 0 18.793 8.508 18.793 18.794 0 10.285-8.508 18.793-18.793 18.793z"></path>
+        </svg>
+        <input
+            type="text"
+            id="search-input"
+            name="q"
+            autocomplete="off"
+            placeholder="Search"
+            class=" text-white text-xs h-6 p-0 my-1 flex-1 bg-black border-none outline-none focus:ring-0 focus:border-transparent"
+        />
+        <button
+          id="clear-btn"
+          class="w-6 h-6 m-1 hidden">
+            <svg class="fill-[#cecccc] rounded-full bg-[#3d3d3d] group-hover:fill-white w-full h-full p-1" xmlns="http://www.w3.org/2000/svg"  viewBox="0 -960 960 960" >
+              <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            <span class="sr-only">clear</span>
+
+        </button>
+          <!-- Loading Indicator -->
+        <div id="search-loader" class="hidden">
+          <div class="loader h-8 w-8 relative"></div>
+        </div>
+
+      </div>
+  
+      <!-- Search Results Dropdown -->
+      <div id="search-results" class="absolute min-w-max right-0  bg-[#1b1b1b] border-[#989898] overflow-y-auto max-h-[80vh]  rounded-md mt-1 hidden no-scrollbar">
+        <div class="sticky top-0 bg-[#2d2d2d] ">
+          <div class="mx-6 border-b-[1px] border-[#fafafa]/10">
+            <button class="me-4 text-white text-sm p-2 border-b-4 border-white">All</button>
+            <button class="me-4 text-white text-sm p-2">Movies</button>
+            <button class="me-4 text-white text-sm p-2">TvSeries</button>
+            <button class="me-4 text-white text-sm p-2">People</button>
+            <button class="text-white text-sm p-2">Collection</button>  
+          </div>
+        </div>
+        <div id="search-results-cont" class="p-2">          
+        </div>
+        <a id="viewAllResultsBtn" href="#" class="hidden w-full bg-blue-600 sticky bottom-0">see all the result</a>
+      </div>
   </div>
+
+</div>

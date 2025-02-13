@@ -1,160 +1,126 @@
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    // Select all carousels on the page
-    const carousels = document.querySelectorAll(".carousel-container-scroll");
-  
-    carousels.forEach((carousel) => {
+function initializePageScripts() {
+  // 🏆 Re-run your carousel logic
+  document.querySelectorAll(".carousel-container-scroll").forEach(carousel => {
       const scrollContainer = carousel.querySelector(".overflow-x-auto");
       const leftButton = carousel.querySelector(".scroll-left");
       const rightButton = carousel.querySelector(".scroll-right");
       const items = carousel.querySelectorAll(".overflow-x-auto > li");
-  
+
       const calculateScrollDistance = () => {
-        const containerWidth = scrollContainer.offsetWidth; // Width of the visible container
-        let totalWidth = 0;
-        let visibleItems = 0;
-  
-        // Calculate the width of fully visible items
-        for (const item of items) {
-          const itemWidth = item.offsetWidth + 20; // Including spacing
-          if (totalWidth + itemWidth <= containerWidth) {
-            totalWidth += itemWidth;
-            visibleItems++;
-          } else {
-            break;
+          const containerWidth = scrollContainer.offsetWidth;
+          let totalWidth = 0;
+          let visibleItems = 0;
+
+          for (const item of items) {
+              const itemWidth = item.offsetWidth + 20;
+              if (totalWidth + itemWidth <= containerWidth) {
+                  totalWidth += itemWidth;
+                  visibleItems++;
+              } else {
+                  break;
+              }
           }
-        }
-  
-        return totalWidth; // Scroll by the total width of fully visible items
+
+          return totalWidth;
       };
-  
-      // Function to scroll left
-      const scrollLeft = () => {
-        const scrollDistance = calculateScrollDistance();
-        scrollContainer.scrollBy({
-          left: -scrollDistance, // Scroll left by visible item width
-          behavior: "smooth",
-        });
-      };
-  
-      // Function to scroll right
-      const scrollRight = () => {
-        const scrollDistance = calculateScrollDistance();
-        scrollContainer.scrollBy({
-          left: scrollDistance, // Scroll right by visible item width
-          behavior: "smooth",
-        });
-      };
-  
-      // Add event listeners to buttons
-      leftButton.addEventListener("click", scrollLeft);
-      rightButton.addEventListener("click", scrollRight);
-    });
+
+      leftButton.addEventListener("click", () => {
+          scrollContainer.scrollBy({ left: -calculateScrollDistance(), behavior: "smooth" });
+      });
+
+      rightButton.addEventListener("click", () => {
+          scrollContainer.scrollBy({ left: calculateScrollDistance(), behavior: "smooth" });
+      });
   });
-  
-  
-  
-  
-  document.addEventListener('DOMContentLoaded', () => {
-    // Listen for clicks on all buttons with the class 'open-modal'
-    document.querySelectorAll('.info-modal-button').forEach(button => {
+
+  // 🏆 Re-run modal logic
+  document.querySelectorAll('.info-modal-button').forEach(button => {
       button.addEventListener('click', () => {
-        // Clear the existing modal content
-        document.getElementById('info-modal-title').textContent = '';
-        document.getElementById('info-modal-genre').textContent = '';
-        document.getElementById('info-modal-release-date').textContent = '';
-        document.getElementById('info-modal-description').textContent = '';
-  
-        // Extract data attributes directly from the button
-        const title = button.dataset.title;
-        const genre = button.dataset.genre;
-        const releaseDate = button.dataset.releaseDate;
-        const description = button.dataset.description;
-  
-        // Inject the new data into the modal
-        document.getElementById('info-modal-title').textContent = title;
-        document.getElementById('info-modal-genre').textContent = genre;
-        document.getElementById('info-modal-release-date').textContent = releaseDate;
-        document.getElementById('info-modal-description').textContent = description;
+          document.getElementById('info-modal-title').textContent = button.dataset.title;
+          document.getElementById('info-modal-genre').textContent = button.dataset.genre;
+          document.getElementById('info-modal-release-date').textContent = button.dataset.releaseDate;
+          document.getElementById('info-modal-description').textContent = button.dataset.description;
       });
-    });
   });
-  
-  
-  document.addEventListener('DOMContentLoaded', function () {
-    // Get the iframe element inside the modal
-    const iframe = document.querySelector('#trailer-modal iframe');
-  
-    // Add event listener to buttons that should set the trailer source
-    const trailerButtons = document.querySelectorAll('[data-trailer]');
-  
-    trailerButtons.forEach(button => {
-      button.addEventListener('click', function () {
-        // Get the trailer key from the button's data attribute
-        const trailerKey = button.getAttribute('data-trailer');
-        
-        // Set the iframe source with the trailer key (YouTube embed URL)
-        iframe.src = `https://www.youtube.com/embed/${trailerKey}`;
+
+  // 🏆 Re-run video trailer logic
+  const iframe = document.querySelector('#trailer-modal iframe');
+  document.querySelectorAll('[data-trailer]').forEach(button => {
+      button.addEventListener('click', () => {
+          iframe.src = `https://www.youtube.com/embed/${button.getAttribute('data-trailer')}`;
       });
-    });
-  
-    // Add event listener to the close button of the modal
-    const closeButton = document.querySelector('[data-drawer-hide="trailer-modal"]');
-    closeButton.addEventListener('click', function () {
-      // Clear the iframe source to stop the video
+  });
+
+  document.querySelector('[data-drawer-hide="trailer-modal"]').addEventListener('click', () => {
       iframe.src = '';
-    });
   });
-  function calculateMargin(width) {
-    const margin = 0.001406 * Math.pow(width, 1.791); // Exponential formula
-    return margin / 2; // Half for each side
-  }
-  
-  // Example usage
-  const width = window.innerWidth; // Dynamically get the current width
-  const margin = calculateMargin(width); // Calculate margin
-  
-  // Apply to an element dynamically
-  const element = document.getElementById("person-container");
-  element.style.marginLeft = `${margin}px`;
-  element.style.marginRight = `${margin}px`;
-  
-  window.onload = () => {
-    const descriptionContainers = document.querySelectorAll(".description-container");
-  
-    if (!descriptionContainers.length) return; // Ensure at least one description exists
-  
-    const checkOverflow = (container, button) => {
-        if (container.scrollHeight > container.offsetHeight) {
-            container.classList.add("hide-last-word");
-            button.classList.remove("hidden");
-        } else {
-            container.classList.remove("hide-last-word");
-            button.classList.add("hidden");
-        }
-    };
-  
-    descriptionContainers.forEach(container => {
-        const wrapper = container.closest(".description-wrapper"); // Find the closest wrapper
-        if (!wrapper) return; // Ensure the container is inside a wrapper
-  
-        const moreButton = wrapper.querySelector(".more-button"); // Get the button inside the same wrapper
-  
-        if (!moreButton) return; // Ensure button exists inside this wrapper
-  
-        checkOverflow(container, moreButton); // Initial check
-        window.addEventListener('resize', () => checkOverflow(container, moreButton)); // Recheck on resize
-    });
-  };
-  
-  
+
+  // 🏆 Re-run image fallback logic
   document.querySelectorAll('.video-thumbnail').forEach(img => {
       img.onload = function () {
           if (img.naturalWidth === 120 && img.naturalHeight === 90) {
-              const fallbackSrc = img.getAttribute('data-fallback-src');
-              img.src = fallbackSrc;
+              img.src = img.getAttribute('data-fallback-src');
           }
       };
   });
+
+  // 🏆 Re-run "Show More" logic
+  document.querySelectorAll(".description-container").forEach(container => {
+      const wrapper = container.closest(".description-wrapper");
+      if (!wrapper) return;
+
+      const moreButton = wrapper.querySelector(".more-button");
+      if (!moreButton) return;
+
+      const checkOverflow = () => {
+          if (container.scrollHeight > container.offsetHeight) {
+              container.classList.add("hide-last-word");
+              moreButton.classList.remove("hidden");
+          } else {
+              container.classList.remove("hide-last-word");
+              moreButton.classList.add("hidden");
+          }
+      };
+
+      checkOverflow();
+      window.addEventListener('resize', checkOverflow);
+  });
+
+  // Call Flowbite Reinitialization
+  reinitializeFlowbite();
+
+}
+
+// Function to reinitialize Flowbite
+function reinitializeFlowbite() {
+  console.log("Reinitializing Flowbite...");
+  window.dispatchEvent(new Event("load")); // This forces Flowbite to reinitialize
+}
+
+// 🚀 Run the scripts when the page loads
+document.addEventListener("DOMContentLoaded", initializePageScripts);
+document.body.addEventListener("htmx:historyRestore", initializePageScripts);
+document.body.addEventListener('htmx:afterSettle', initializePageScripts);
+
+document.addEventListener("htmx:afterSwap", function() {
+  window.scrollTo(0, 0);
+});
+
+function addLoaderBars() {
+    document.querySelectorAll('.loader').forEach(loader => {
+      // Avoid adding bars if they already exist
+      if (loader.children.length === 0) {
+        for (let i = 0; i < 12; i++) {
+          const bar = document.createElement('div');
+          loader.appendChild(bar);
+        }
+      }
+    });
+  }
+  
+  // Run on page load
+  addLoaderBars();
+  
+  // Re-run when HTMX updates the DOM
+  document.body.addEventListener('htmx:afterSettle', addLoaderBars);
   

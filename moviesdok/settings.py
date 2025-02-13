@@ -8,12 +8,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 
 # Read the .env file (make sure it's in the root directory)
-environ.Env.read_env()
+env.read_env(BASE_DIR / ".env")
 
 # Use the SECRET_KEY from the .env file
-SECRET_KEY = 'django-insecure-5yuoj!l72)wc&f8=sd+*=nf6z)e=g6c4_t)9hibze=xw9g&v6)'
-DEBUG=True
-TMDB_API_KEY='576b7f218633cca086cfcd05227957ed'
+SECRET_KEY = env("SECRET_KEY")
+DEBUG = env.bool("DEBUG", default=False)
+TMDB_API_KEY = env("TMDB_API_KEY")
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
 

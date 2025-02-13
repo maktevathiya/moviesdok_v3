@@ -10,8 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="{% static 'css/dist/styles.css' %}?v={% now "U" %}" rel="stylesheet">
     <link href="{% static 'css/dist/cs.css' %}" rel="stylesheet">
-    <script src="https://unpkg.com/htmx.org@1.7.0"></script>    
-    
+    <script src="https://unpkg.com/htmx.org@1.7.0"></script>  
 </head>
 <body class="bg-[#2d2d2d] font-roboto">
     <!-- Header -->
@@ -21,11 +20,14 @@
 
     <!-- Main Content Area -->
     <main>
-      <div id="content" class="max-w-screen-2xl min-w-56 min-h-screen mx-auto" >
+      <div id="content" class="relative max-w-screen-2xl min-w-56 min-h-screen mx-auto" >
         {% include partial_template %}
       </div>
-
-
+      <div id="loader" class=" fixed loader-container z-40 inset-0 bg-[#2d2d2d] min-h-screen items-center justify-center">
+        <div class="w-14 h-14 relative">
+          <div class="loader"></div>       
+        </div>
+      </div>
       <div id="info-modal" tabindex="-1"  aria-hidden="true" class="hidden bg-black/60 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-full">
         <div class="relative p-4 w-full max-w-2xl max-h-full">
           <!-- Modal content -->
@@ -55,10 +57,10 @@
         </div>               
       </div>
       
-      <div id="trailer-modal"  tabindex="-1" aria-labelledby="trailer-modal" class=" bg-black overflow-y-auto overflow-x-hidden fixed top-0 right-0 transition-transform translate-x-full z-50  w-full h-full">
+      <div id="trailer-modal"  tabindex="-1" aria-labelledby="trailer-modal" class=" bg-[#222222] overflow-y-auto overflow-x-hidden fixed top-0 right-0 transition-transform translate-x-full z-50  w-full h-full">
           <!-- Modal content -->
             <!-- header -->
-            <button type="button" data-drawer-hide="trailer-modal" class="absolute group top-0 right-0 m-4 font-bold rounded-full bg-[#333333] hover:bg-[#2e2e2e] p-2">
+            <button type="button" data-drawer-hide="trailer-modal" class="absolute group top-0 left-0 m-4 font-bold rounded-full bg-[#504f4f] hover:bg-[#2e2e2e] p-2">
               <svg class="fill-[#cecccc] group-hover:fill-white" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" >
                 <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
               <span class="sr-only">Close</span>
@@ -66,13 +68,16 @@
         
             <!-- body -->
             <div class="flex items-center justify-center w-full h-full md:p-14">
-              <iframe 
-                class="w-full aspect-[16/9] md:aspect-none md:w-full md:h-full md:rounded-lg" 
+              <div class="w-full md:w-auto md:h-full aspect-[16/9]">
+                <iframe 
+                class="w-full h-full md:rounded-xl"
                 src="" 
                 frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
               </iframe>
+
+              </div>
             </div>
       </div>
     </main>
@@ -150,7 +155,7 @@
         goToSlide(0);
     
         // Carousel touch event handlers for swiping
-        const carousel = document.querySelector("#controls-carousel .relative");
+        const carousel = document.querySelector("#hero-carousel .relative");
         let startX = 0;
         let endX = 0;
         let isSwipe = false;
@@ -224,5 +229,274 @@ window.onload = () => {
 
 </script>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("search-input");
+    const searchResults = document.getElementById("search-results");
+    const searchResultsCont = document.getElementById("search-results-cont");
+    const loadingIndicator = document.getElementById("search-loader");
+    const clearBtn = document.getElementById("clear-btn");
+    const categoryButtons = document.querySelectorAll("#search-results button");
+    const viewAllResultsBtn = document.getElementById("viewAllResultsBtn"); // The new button
+
+    let timeout = null;
+
+    // Function to get the active category
+    function getActiveCategory() {
+        const activeBtn = document.querySelector("#search-results button.border-white.border-b-4");
+        return activeBtn ? activeBtn.textContent.toLowerCase() : "all"; // Default if none active
+    }
+
+    // Initial category detection
+    let selectedCategory = getActiveCategory();
+
+    // Handle category button clicks
+    categoryButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            categoryButtons.forEach(btn => btn.classList.remove("border-white", "border-b-4"));
+            this.classList.add("border-white", "border-b-4");
+
+            selectedCategory = getActiveCategory(); // Update category
+            fetchSearchResults(); // Fetch new results based on the updated category
+        });
+    });
+
+    // Fetch search results
+    function fetchSearchResults() {
+        const query = searchInput.value.trim();
+        if (!query) {
+            searchResultsCont.innerHTML = `<div class="p-2 text-gray-500 text-sm">Start typing for results...</div>`;
+            searchResults.classList.remove("hidden");
+            if (viewAllResultsBtn) viewAllResultsBtn.classList.add("hidden");  viewAllResultsBtn.classList.remove("block"); // Hide button when empty
+            return;
+        }
+
+        loadingIndicator.classList.remove("hidden");
+        clearBtn.classList.add("hidden");
+
+        // Construct search URL dynamically
+        const searchURL = `/search/?q=${encodeURIComponent(query)}&category=${encodeURIComponent(selectedCategory)}`;
+
+        // Update the "View All Results" button link
+        if (viewAllResultsBtn) {
+            viewAllResultsBtn.href = searchURL;
+            viewAllResultsBtn.classList.remove("hidden");
+            viewAllResultsBtn.classList.add("block"); // Show button when search is active
+        }
+
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            fetch(searchURL, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json" 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                searchResultsCont.innerHTML = "";
+                loadingIndicator.classList.add("hidden");
+                if (query) clearBtn.classList.remove("hidden");
+
+                if (data.results.length === 0) {
+                    searchResultsCont.innerHTML = `<div class="p-2 text-gray-500 text-sm">No results found.</div>`;
+                } else {
+                    data.results.slice(0, 10).forEach(item => {
+                        const title = item.title || item.name || "Untitled";
+                        const poster = item.poster_path ? `https://image.tmdb.org/t/p/w92${item.poster_path}` : `https://image.tmdb.org/t/p/w92${item.profile_path}`;
+
+                        const resultItem = document.createElement("div");
+                        resultItem.classList.add("p-2", "hover:bg-[#efefef]", "group", "rounded", "cursor-pointer", "flex", "items-center");
+                        resultItem.innerHTML = `
+                            <img src="${poster}" alt="${title}" class="w-10 h-14 mr-3 rounded-md">
+                            <span class="text-sm text-white group-hover:font-bold group-hover:text-black">${title}</span>
+                        `;
+                        resultItem.addEventListener("click", () => {
+                            window.location.href = `/${item.media_type}/${item.id}`;
+                        });
+
+                        searchResultsCont.appendChild(resultItem);
+                    });
+                }
+                searchResults.classList.remove("hidden");
+            })
+            .catch(() => {
+                loadingIndicator.classList.add("hidden");
+                searchResultsCont.innerHTML = `<div class="p-2 text-red-500 text-xs">Error fetching results.</div>`;
+            });
+        }, 300);
+    }
+
+    searchInput.addEventListener("input", fetchSearchResults);
+
+    clearBtn.addEventListener("click", function () {
+        searchInput.value = "";
+        clearBtn.classList.add("hidden");
+        searchResults.classList.add("hidden");
+        if (viewAllResultsBtn) viewAllResultsBtn.classList.add("hidden"); viewAllResultsBtn.classList.remove("block"); // Hide button when cleared
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.classList.add("hidden");
+            searchInput.value = "";
+            clearBtn.classList.add("hidden");
+            if (viewAllResultsBtn) viewAllResultsBtn.classList.add("hidden"); viewAllResultsBtn.classList.remove("block"); // Hide button when clicking outside
+        }
+    });
+
+    searchInput.addEventListener("focus", () => {
+        if (!searchInput.value.trim()) {
+            searchResultsCont.innerHTML = `<div class="p-2 text-white text-sm rounded text-center"><p>Start typing for results...</p></div>`;
+            searchResults.classList.remove("hidden");
+        }
+    });
+  });
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const inputField = document.getElementById("movie-search-bar");
+    const resultsBox = document.getElementById("movie-search-dropdown");
+    const resultsContainer = document.getElementById("movie-results-container");
+    const loaderIcon = document.getElementById("movie-search-spinner");
+    const resetButton = document.getElementById("reset-search");
+    const categoryBtns = document.querySelectorAll("#movie-search-dropdown button");
+    
+    let debounceTimeout = null;
+
+    // Function to get the active category based on applied classes
+    function getActiveCategory() {
+      const activeBtn = document.querySelector("#movie-search-dropdown button.border-blue-600.border-b-4");
+      return activeBtn ? activeBtn.textContent.toLowerCase() : "all"; // Fallback if none are active
+    }
+
+    // Initial category detection
+    let activeCategory = getActiveCategory();
+    // Handle category switching
+    categoryBtns.forEach(btn => {
+        btn.addEventListener("click", function () {
+            categoryBtns.forEach(b => b.classList.remove("border-blue-600","border-b-4"));
+            this.classList.add("border-blue-600","border-b-4");
+
+            activeCategory = this.textContent.toLowerCase(); // Change category
+            fetchResults(); // Get new results
+        });
+    });
+
+    // Fetch search results
+    function fetchResults() {
+        const query = inputField.value.trim();
+        if (!query) {
+            resultsContainer.innerHTML = `<div class="p-2 text-gray-400 text-sm">Start typing to see suggestions...</div>`;
+            resultsBox.classList.remove("hidden");
+            return;
+        }
+
+        loaderIcon.classList.remove("hidden");
+        resetButton.classList.add("hidden");
+
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+            fetch(`/search/?q=${encodeURIComponent(query)}&category=${encodeURIComponent(activeCategory)}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = "";
+                loaderIcon.classList.add("hidden");
+                if (query) resetButton.classList.remove("hidden");
+
+                if (data.results.length === 0) {
+                    resultsContainer.innerHTML = `<div class="p-2 text-gray-400 text-sm">No matches found.</div>`;
+                } else {
+                    data.results.slice(0, 10).forEach(item => {
+                        const title = item.title || item.name || "Unknown";
+                        const imgSrc = item.poster_path ? `https://image.tmdb.org/t/p/w92${item.poster_path}` : 
+                                       (item.profile_path ? `https://image.tmdb.org/t/p/w92${item.profile_path}` : "https://via.placeholder.com/92");
+
+                        const resultEntry = document.createElement("div");
+                        resultEntry.classList.add("p-2", "hover:bg-[#ddd]", "rounded-md", "cursor-pointer", "flex", "items-center");
+                        resultEntry.innerHTML = `
+                            <img src="${imgSrc}" alt="${title}" class="w-10 h-14 mr-3 rounded-lg">
+                            <span class="text-sm text-gray-200 group-hover:font-semibold group-hover:text-black">${title}</span>
+                        `;
+                        resultEntry.addEventListener("click", () => {
+                            window.location.href = `/${item.media_type}/${item.id}`;
+                        });
+
+                        resultsContainer.appendChild(resultEntry);
+                    });
+                }
+                resultsBox.classList.remove("hidden");
+            })
+            .catch(() => {
+                loaderIcon.classList.add("hidden");
+                resultsContainer.innerHTML = `<div class="p-2 text-red-500 text-xs">Error retrieving results.</div>`;
+            });
+        }, 300);
+    }
+
+    inputField.addEventListener("input", fetchResults);
+
+    resetButton.addEventListener("click", function () {
+        inputField.value = "";
+        resetButton.classList.add("hidden");
+        resultsBox.classList.add("hidden");
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!inputField.contains(event.target) && !resultsBox.contains(event.target)) {
+            inputField.value = "";
+            resetButton.classList.add("hidden");
+        }
+    });
+
+    inputField.addEventListener("focus", () => {
+        if (!inputField.value.trim()) {
+            resultsContainer.innerHTML = `<div class="p-2 text-gray-400 text-sm rounded text-center"><p>Start typing to see suggestions...</p></div>`;
+            resultsBox.classList.remove("hidden");
+        }
+    });
+});
+
+</script>
+<script>
+  document.addEventListener("htmx:afterSettle", function () {
+    let visitedPages = JSON.parse(sessionStorage.getItem("visitedPages")) || [];
+    let currentURL = window.location.pathname;
+
+    if (!currentURL.includes("/search") && !visitedPages.includes(currentURL)) {
+        visitedPages.push(currentURL);
+        sessionStorage.setItem("visitedPages", JSON.stringify(visitedPages));
+    }
+});
+
+// Also run on first page load
+document.addEventListener("DOMContentLoaded", function () {
+    document.dispatchEvent(new Event("htmx:afterSettle"));
+});
+
+function goBackCustom(button) {
+  let visitedPages = JSON.parse(sessionStorage.getItem("visitedPages")) || [];
+
+  if (visitedPages.length > 0) {
+      let lastNonSearchPage = visitedPages.pop();
+      sessionStorage.setItem("visitedPages", JSON.stringify(visitedPages));
+
+      button.setAttribute("hx-get", lastNonSearchPage);
+  } else {
+      button.setAttribute("hx-get", "/");
+  }
+
+  // ✅ Manually trigger HTMX request
+  htmx.process(button);
+  button.click(); // Simulate a click to trigger the request
+}
+</script>
 </body>
 </html>
