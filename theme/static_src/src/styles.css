@@ -50,11 +50,10 @@
 
   .carousel-container ul {
     gap: var(--gap);
-    gap2: var(--gap2);
   }
 
   .carousel-container li {
-    flex: 0 0 calc((100% - (var(--items) - 1) * var(--gap) - var(--gap2)) / var(--items));
+    flex: 0 0 calc((100% - (var(--items) - 1) * var(--gap)) / var(--items));
   }
 
   @media (max-width: 767px) { /* Screens smaller than 768px */
@@ -89,6 +88,24 @@
 
   .no-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari, and Opera */
+  }
+  /* For Webkit-based browsers (Chrome, Edge, Safari) */
+  .scrollbar::-webkit-scrollbar {
+    width: 8px; /* Scrollbar width */
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    background: #363636; /* Track color */
+    border-radius: 10px;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: #888; /* Scroll thumb color */
+    border-radius: 10px;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Scroll thumb hover color */
   }
   /* loader */
   :root {

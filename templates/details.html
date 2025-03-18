@@ -104,7 +104,7 @@
                 <button class="relative mb-2 w-full" data-trailer= {{movie.key }} data-drawer-target="trailer-modal" data-drawer-show="trailer-modal" data-drawer-placement="right" aria-controls="trailer-modal"  type="button">
                   <div class="flex-shrink-0">
                     <img src="https://img.youtube.com/vi/{{ movie.key }}/maxresdefault.jpg"
-                      class="video-thumbnail w-full aspect-[16/9] object-cover rounded-xl shadow-lg"
+                      class="video-thumbnail w-full aspect-[16/9] object-cover rounded-xl shadow-lg shadow-black/70"
                       data-fallback-src="https://image.tmdb.org/t/p/w500{% if backdrop_path %}{{backdrop_path}}{% else %}{{poster_path}}{% endif %}" 
                       alt="Movie Poster"
                       loading="lazy">
@@ -225,9 +225,9 @@
                   <div class="flex-shrink-0 relative mb-2">
                     <a hx-get="/person/{{person.id}}" hx-target="#content" hx-trigger="click"hx-push-url="true" hx-indicator="#loader">
                       <img src="https://image.tmdb.org/t/p/w300{{ person.profile_path }}"
-                      class="w-[94px] md:w-[98px] lg:w-[100px] xl:w-[132px] 2xl:w-[127px] aspect-1 object-cover rounded-full shadow-lg"
+                      class="w-[94px] md:w-[98px] lg:w-[100px] xl:w-[132px] 2xl:w-[127px] aspect-1 object-cover rounded-full shadow-lg shadow-black/80"
                       loading="lazy"
-                      onerror="this.onerror=null; this.src='{% static 'placeholder/person.png' %}';" 
+                      onerror="this.onerror=null; this.src='{% static 'placeholder/person.svg' %}';" 
                       decoding="async"
                       alt="{{person.name}}">
                     </a>

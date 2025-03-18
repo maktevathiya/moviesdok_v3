@@ -353,7 +353,7 @@ TV_GENRE_MAPPING = {
     37: "Western"
 }
 
-def fetch_homepage_data():
+def fetch_homepage_data_old():
     """
     Fetches all necessary data for the homepage, including:
     - Trending (all categories)
@@ -377,7 +377,7 @@ def fetch_homepage_data():
         }
 
         # Fetch trending all categories
-        trending_all_url = f"{BASE_URL}/trending/all/day"
+        trending_all_url = f"{BASE_URL}/trending/all/week"
         trending_all_params = {"api_key": API_KEY}
         trending_all_data = make_api_call(trending_all_url, trending_all_params)
 
@@ -392,7 +392,7 @@ def fetch_homepage_data():
             print('Failed trending data for all ')
 
         # Fetch trending movies
-        trending_movies_url = f"{BASE_URL}/trending/movie/day"
+        trending_movies_url = f"{BASE_URL}/trending/movie/week"
         trending_movies_params = {"api_key": API_KEY}
         trending_movies_data = make_api_call(trending_movies_url, trending_movies_params)
         if trending_movies_data and 'results' in trending_movies_data:
@@ -402,7 +402,7 @@ def fetch_homepage_data():
 
 
         # Fetch trending TV shows
-        trending_tv_url = f"{BASE_URL}/trending/tv/day"
+        trending_tv_url = f"{BASE_URL}/trending/tv/week"
         trending_tv_params = {"api_key": API_KEY}
         trending_tv_data = make_api_call(trending_tv_url, trending_tv_params)
         if trending_tv_data and 'results' in trending_tv_data:
@@ -411,7 +411,7 @@ def fetch_homepage_data():
             print('trending data for tv recived')
 
         # Fetch popular persons
-        popular_persons_url = f"{BASE_URL}/trending/person/day"
+        popular_persons_url = f"{BASE_URL}/trending/person/week"
         popular_persons_params = {"api_key": API_KEY}
         popular_persons_data = make_api_call(popular_persons_url, popular_persons_params)
         if popular_persons_data and 'results' in popular_persons_data:
@@ -480,11 +480,122 @@ def fetch_homepage_data():
         
             print(f"\rProcessing: {i}/{total_items} items ({progress:.2f}%)", end="")
         print("\nProcessing complete!")
-        # Cache the combined data for 6 hours
-        cache.set(cache_key, homepage_data, timeout=86400)
+        # Cache the combined data for 3 day
+        cache.set(cache_key, homepage_data, timeout=259200)
 
     return homepage_data
 
+def fetch_homepage_data():
+    """
+    Fetches necessary data for the homepage, including:
+    - Trending movies
+    - Trending TV shows
+    - Popular persons
+    - Trailers for each movie and TV show, embedded in their respective entries
+    - Top 20 trailers based on popularity
+
+    :return: A dictionary containing all the fetched data.
+    """
+    cache_key = "homepage_data"
+    #cache.delete(cache_key)
+    homepage_data = cache.get(cache_key)
+
+    if not homepage_data:
+        homepage_data = {
+            "trending_movies": [],
+            "trending_tv": [],
+            "popular_persons": [],
+            "top_20_trailers": []
+        }
+
+        def fetch_trending_data(media_type, category_key, genre_mapping):
+            """ Fetch trending data and replace genre IDs with names """
+            url = f"{BASE_URL}/trending/{media_type}/week"
+            params = {"api_key": API_KEY}
+            data = make_api_call(url, params)
+            if data and 'results' in data:
+                sorted_data = sorted(data['results'], key=lambda x: x.get('popularity', 0), reverse=True)
+                
+                # Replace genre IDs with names
+                for item in sorted_data:
+                    if 'genre_ids' in item:
+                        item['genres'] = [genre_mapping.get(genre_id) for genre_id in item['genre_ids'] if genre_mapping.get(genre_id)]
+
+                homepage_data[category_key] = sorted_data
+                print(f"Trending data for {media_type} received.")
+            else:
+                print(f"Failed to fetch trending data for {media_type}.")
+
+        # Fetch trending movies and TV shows with genre mapping
+        fetch_trending_data("movie", "trending_movies", MOVIE_GENRE_MAPPING)
+        fetch_trending_data("tv", "trending_tv", TV_GENRE_MAPPING)
+
+        # Fetch popular persons (actors)
+        popular_persons_url = f"{BASE_URL}/trending/person/week"
+        popular_persons_params = {"api_key": API_KEY}
+        popular_persons_data = make_api_call(popular_persons_url, popular_persons_params)
+
+        if popular_persons_data and 'results' in popular_persons_data:
+            filtered_results = [item for item in popular_persons_data['results'] if item.get('known_for_department') == 'Acting']
+            homepage_data["popular_persons"] = sorted(filtered_results, key=lambda x: x.get('popularity', 0), reverse=True)
+            print("Trending data for persons received.")
+
+        top_trailers = []  # Temporary list for sorting top 20 trailers
+
+        def fetch_trailers(category_key, media_type):
+            """ Fetch trailers for a given category (movies or TV shows) and embed them in the original entry """
+            for item in homepage_data[category_key]:
+                title_id = item.get("id")
+                if not title_id:
+                    continue
+
+                title_url = f"{BASE_URL}/{media_type}/{title_id}"
+                title_params = {"api_key": API_KEY, "append_to_response": "videos,images"}
+                title_data = make_api_call(title_url, title_params)
+
+                if title_data:
+                    # Extract trailers
+                    trailers = [video for video in title_data.get('videos', {}).get('results', []) if video.get('type') == 'Trailer']
+                    
+                    if trailers:
+                        english_trailer = next((trailer for trailer in trailers if trailer.get('iso_639_1') == 'en'), None)
+                        selected_trailer = english_trailer if english_trailer else trailers[0]
+                        
+                        # Embed trailer directly into the movie/TV show entry
+                        item["trailer"] = selected_trailer
+
+                        # Store trailer for top 20 sorting
+                        top_trailers.append({
+                            "title": item.get("title") or item.get("name"),
+                            "trailer": selected_trailer,
+                            "backdrop_path": item.get("backdrop_path"),
+                            "poster_path": item.get("poster_path"),
+                            "popularity": item.get("popularity", 0)
+                        })
+                    else:
+                        item["trailer"] = None  # No trailer found
+
+                    # Extract logos
+                    logos = title_data.get('images', {}).get('logos', [])
+                    if logos:
+                        english_logo = next((logo for logo in logos if logo.get('iso_639_1') == 'en'), None)
+                        item['logo'] = english_logo['file_path'] if english_logo else logos[0]['file_path']
+                    else:
+                        item['logo'] = ""
+
+        # Fetch trailers and embed them into movies and TV shows
+        fetch_trailers("trending_movies", "movie")
+        fetch_trailers("trending_tv", "tv")
+
+        # Sort and store the top 20 trailers
+        homepage_data["top_20_trailers"] = sorted(top_trailers, key=lambda x: x["popularity"], reverse=True)[:20]
+
+        print("Trailers fetched, embedded, and top 20 list created.")
+
+        # Cache the data for 3 days
+        cache.set(cache_key, homepage_data, timeout=259200)
+
+    return homepage_data
 
 
 def get_title_details(tmdb_id, media_type):

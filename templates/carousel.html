@@ -1,0 +1,186 @@
+{% load static %}
+<div id="hero-carousel" class="relative w-full" data-carousel="static">
+    <!-- Carousel wrapper -->
+    <div class="relative h-[80vh] md:h-[90vh] overflow-x-hidden max-h-[900px] min-h-[500px] min-w-56">
+        {% for title in trending_all %}
+        <div class="hidden duration-700 ease-in-out  " data-carousel-item>
+            <!-- Backdrop Image -->
+            <a hx-get="/{{title.media_type}}/{{title.id}}" hx-target="#content" hx-trigger="click" hx-push-url="true" hx-indicator="#loader">
+              <img src="https://image.tmdb.org/t/p/original{{ title.backdrop_path }}" 
+                 class="absolute inset-0 w-full h-full object-cover object-center" 
+                 alt="{% if title.title %}
+                        {{ title.title }}
+                      {% else %}
+                        {{ title.name }}
+                      {% endif %}">
+             <div class=" absolute h-1/2 w-full bottom-0 bg-gradient-to-tr from-[#0a0a0a] to-transparent via-transparent"></div>
+            </a>
+            <!-- Content Overlay -->
+            <div class="absolute md:left-0 bottom-0 w-full md:w-[380px] px-5 md:px-10">
+              <div class="mb-10 flex flex-col md:items-start items-center md:text-left text-center">
+                <!-- Logo -->
+                {% if title.logo %}
+                <img src="https://image.tmdb.org/t/p/original{{ title.logo }}" 
+                     class="relative h-[60px] w-auto object-contain" 
+                     alt="{% if title.title %}{{ title.title }}{% else %}{{ title.name }}{% endif %} Logo">
+            {% else %}
+                <span class="font-bold text-2xl text-white">{% if title.title %}{{ title.title }}{% else %}{{ title.name }}{% endif %}</span>
+            {% endif %}
+            
+  
+               <p class="text-[#B3B2B0] font-bold text-sm mb-2">
+                {% if title.genres %}
+                    {% for genre in title.genres|slice:":2" %}
+                        {{ genre }}{% if not forloop.last %} | {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </p>
+            <div class="relative">
+              
+              <p id="description-container-{{ forloop.counter0 }}" class="line-clamp-4 text-[#F3F4F3] hide-last-word">
+                {{ title.overview }}
+              </p>
+              <button id="more-button-{{ forloop.counter0 }}" data-description="{{title.overview}}" 
+              class="absolute z-30 info-modal-button hidden bottom-0 right-0 text-xs font-bold text-[#0A84fF] "
+              data-modal-target="info-modal" 
+              data-modal-toggle="info-modal" 
+              data-title="Overview" 
+              >
+                MORE
+            </button>
+            </div>
+              <!--buttons-->
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+    </div>
+  
+    <!-- Dynamic indicators -->
+    <div id="dynamic-indicator-container" class="absolute items-center z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
+      <!-- Dynamic indicators will be inserted here via JavaScript -->
+    </div>
+  
+    <!-- Slider controls -->
+    <button type="button" class="absolute hidden md:flex top-0 start-0 z-30  items-center justify-start h-full w-[25vw] md:w-[15vw] px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+        <svg class="w-4 h-6  text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M5 1 1 5l4 4"/>
+        </svg>
+        <span class="sr-only">Previous</span>
+    </button>
+  
+    <button type="button" class="absolute hidden md:flex top-0 end-0 z-30  items-center justify-end h-full w-[25vw] md:w-[15vw] px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+        <svg class="w-4 h-6 text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="sr-only">Next</span>
+    </button>
+  </div>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const totalSlides = {{ trending_all|length }}; // Total slides from the Django context
+      const visibleDots = 8; // Number of dots visible at a time
+      const indicatorContainer = document.getElementById("dynamic-indicator-container");
+      let currentSlide = 0;
+      const slides = document.querySelectorAll("[data-carousel-item]");
+  
+      // Function to check if the description overflows
+      const checkOverflow = (slideIndex) => {
+          const descriptionContainer = document.getElementById(`description-container-${slideIndex}`);
+          const moreButton = document.getElementById(`more-button-${slideIndex}`);
+          
+          if (descriptionContainer.scrollHeight > descriptionContainer.offsetHeight) {
+              moreButton.classList.remove("hidden");
+              descriptionContainer.classList.add("hide-last-word");
+
+          } else {
+              moreButton.classList.add("hidden");
+              descriptionContainer.classList.remove("hide-last-word");
+            }
+      };
+  
+      // Function to update indicators dynamically
+      function updateIndicators() {
+          indicatorContainer.innerHTML = ""; // Clear existing indicators
+  
+          // Calculate the start and end of the visible range
+          const start = Math.max(0, Math.min(currentSlide - Math.floor(visibleDots / 2), totalSlides - visibleDots));
+          const end = Math.min(totalSlides, start + visibleDots);
+  
+          // Create indicator dots based on current slide position
+          for (let i = start; i < end; i++) {
+              const dot = document.createElement("button");
+              dot.type = "button";
+              dot.className = `rounded-full transition-all duration-300 ${i === currentSlide ? "w-2 h-2 bg-white" : "w-1 h-1 bg-white/30"}`;
+              dot.setAttribute("aria-label", `Slide ${i + 1}`);
+              dot.addEventListener("click", () => goToSlide(i)); // Go to the clicked slide
+              indicatorContainer.appendChild(dot);
+          }
+      }
+  
+      // Function to go to a specific slide
+      function goToSlide(slideIndex) {
+          currentSlide = slideIndex;
+          slides.forEach((slide, index) => slide.classList.toggle("hidden", index !== currentSlide));
+          updateIndicators(); // Ensure indicator updates with every navigation
+          checkOverflow(currentSlide); // Check overflow for the new slide
+      }
+  
+      // Carousel controls: next and prev buttons
+      document.querySelector("[data-carousel-next]").addEventListener("click", () => {
+          currentSlide = (currentSlide + 1) % totalSlides;
+          goToSlide(currentSlide);
+      });
+  
+      document.querySelector("[data-carousel-prev]").addEventListener("click", () => {
+          currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+          goToSlide(currentSlide);
+      });
+  
+      // Initialize the carousel by displaying the first slide
+      goToSlide(0);
+  
+      // Carousel touch event handlers for swiping
+      const carousel = document.querySelector("#hero-carousel .relative");
+      let startX = 0;
+      let endX = 0;
+      let isSwipe = false;
+  
+      carousel.addEventListener("touchstart", (e) => {
+          startX = e.touches[0].clientX; // Store starting X coordinate
+          isSwipe = false; // Reset swipe flag at the start of touch
+      });
+  
+      carousel.addEventListener("touchmove", (e) => {
+          endX = e.touches[0].clientX; // Store current X coordinate
+          if (Math.abs(startX - endX) > 10) { // Set a minimal movement threshold for swipe
+              isSwipe = true; // Mark it as a swipe if movement is significant
+          }
+      });
+  
+      carousel.addEventListener("touchend", () => {
+          const threshold = 10; // Define swipe threshold
+  
+          if (isSwipe) {
+              // Detect swipe direction and go to the respective slide
+              if (startX - endX > threshold) {
+                  goToSlide((currentSlide + 1) % totalSlides); // Swipe left -> Next slide
+              } else if (endX - startX > threshold) {
+                  goToSlide((currentSlide - 1 + totalSlides) % totalSlides); // Swipe right -> Previous slide
+              }
+          }
+  
+          // Reset the swipe state variables after touch end
+          startX = 0;
+          endX = 0;
+          isSwipe = false; // Clear the swipe flag
+      });
+  
+      // Check overflow on window resize
+      window.addEventListener('resize', () => {
+          checkOverflow(currentSlide);
+      });
+  });
+  
+  </script>
